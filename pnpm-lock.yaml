@@ -130,6 +130,16 @@ importers:
         specifier: latest
         version: link:../..
 
+  examples/subscription:
+    specifiers:
+      '@nuxt/ui': latest
+      nuxt: latest
+      nuxt-graphql-client: latest
+    devDependencies:
+      '@nuxt/ui': 0.3.3_nuxt@3.0.0
+      nuxt: 3.0.0
+      nuxt-graphql-client: link:../..
+
   playground:
     devDependencies:
       nuxt-graphql-client:

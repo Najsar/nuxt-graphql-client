@@ -6,7 +6,7 @@ import { name, version } from '../package.json'
 import generate from './generate'
 import { mapDocsToClients, extractGqlOperations } from './utils'
 import type { GqlConfig, GqlClient, GqlCodegen, TokenStorageOpts } from './types'
-import { prepareContext, mockTemplate } from './context'
+import { prepareContext } from './context'
 import type { GqlContext } from './context'
 
 const logger = useLogger('nuxt-graphql-client')
@@ -175,7 +175,7 @@ export default defineNuxtModule<GqlConfig>({
 
       if (documents?.length) {
         ctx.clientDocs = mapDocsToClients(documents, ctx.clients!)
-        plugins.push('typescript-operations', 'typescript-graphql-request')
+        plugins.push('typescript-operations', 'ogql/plugin')
       }
 
       if (ctx.clientDocs) {
@@ -199,7 +199,7 @@ export default defineNuxtModule<GqlConfig>({
 
             const entries = extractGqlOperations(ctx?.clientDocs?.[k] || [])
 
-            return { ...acc, [k]: mockTemplate(entries) }
+            return { ...acc, [k]: mockPlugin(entries) }
           }, {})
 
         ctx.template = defu(codegenResult, ctx.template)
@@ -249,7 +249,7 @@ export default defineNuxtModule<GqlConfig>({
       const clientSdks = Object.entries(ctx.clientDocs || {}).reduce<string[]>((acc, [client, docs]) => {
         const entries = extractGqlOperations(docs)
 
-        return [...acc, `${client}: ` + mockTemplate(entries).replace('export ', '')]
+        return [...acc, `${client}: ` + mockPlugin(entries).replace('export ', '')]
       }, [])
 
       nitro.virtual = nitro.virtual || {}
@@ -299,14 +299,6 @@ export default defineNuxtModule<GqlConfig>({
     }
 
     await generateGqlTypes()
-
-    nuxt.hook('vite:extendConfig', (config, { isServer }) => {
-      config.optimizeDeps?.include?.push('graphql-request')
-
-      if (isServer && config.define?.['typeof document']) {
-        delete config.define['typeof document']
-      }
-    })
   }
 })
 
